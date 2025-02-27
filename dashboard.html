@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Locker Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css"> <!-- Link to your CSS -->
+    <script defer src="dashboard.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <h2 class="logo">🏦 Bank Locker System</h2>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </nav>
+
+        <!-- Dashboard content -->
+        <div class="dashboard-content">
+            <h2 class="title">Locker Status</h2>
+        </div>
+
+        <!-- Buttons for actions -->
+        <div class="container">
+            <button id="withdraw">Withdraw</button>
+            <button id="deposit">Deposit</button>
+            <button id="checkBalance">Check Balance</button>
+        </div>
+
+        <!-- Modal for Success/Failure Messages -->
+        <div class="modal" id="messageModal">
+            <div class="modal-content">
+                <p id="modalMessage"></p>
+                <button id="closeModal">Close</button>
+            </div>
+        </div>
+
+        <!-- Input Form (Hidden by default, shown when an action is selected) -->
+        <div id="inputFormContainer" style="display:none;">
+            <input type="password" id="dashBoardPin" placeholder="Enter PIN" />
+            <input type="number" id="amount" placeholder="Enter Amount" />
+            <button id="submitAction">Submit</button>
+            <button id="cancelAction">Cancel</button>
+        </div>
+
+
+
+
+        <!-- Dynamically created input form
+        <div id="inputFormContainer" style="display:none;">
+            <input type="password" id="dashBoardPin" placeholder="Enter PIN" />
+            <input type="number" id="amount" placeholder="Enter Amount" />
+            <button id="submitAction">Submit</button>
+            <button id="cancelAction">Cancel</button>
+        </div> -->
+    </div>
+
+
+
+
+</body>
+
+</html>

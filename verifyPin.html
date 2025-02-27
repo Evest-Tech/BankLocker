@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Verify PIN</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* Body styles */
+        body {
+            background: linear-gradient(45deg, #0A174E, #2c3e50);
+            /* Dark Blue gradient background */
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        /* Container for the form */
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s forwards 0.5s;
+            /* Fade-in effect */
+        }
+
+        /* Heading style */
+        h2 {
+            color: #0A174E;
+            /* Golden Yellow */
+            font-size: 24px;
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        /* Form input field style */
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            animation: inputFocus 0.3s ease-in-out;
+        }
+
+        /* Focus effect on input */
+        .form-control:focus {
+            border-color: #0A174E;
+            /* Golden Yellow */
+            box-shadow: 0px 0px 5px #0A174E;
+        }
+
+        /* Submit button style */
+        .btn-primary {
+            background-color: #0A174E;
+            /* Golden Yellow */
+            border-color: #0A174E;
+            /* Golden Yellow */
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            animation: buttonHover 0.3s ease-out;
+        }
+
+        /* Button hover effect */
+        .btn-primary:hover {
+            background-color: #F5D042;
+            /* Dark Blue */
+            border-color: #F5D042;
+            /* Dark Blue */
+        }
+
+        /* Animation for fading in */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Animation for sliding in heading */
+        @keyframes slideIn {
+            0% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Animation for input field */
+        @keyframes inputFocus {
+            0% {
+                transform: scale(0.95);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Animation for button hover */
+        @keyframes buttonHover {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-5">Enter Your PIN to Login</h2>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="pin" class="form-label">PIN</label>
+                <input type="password" id="pin" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const pin = document.getElementById("pin").value.trim(); // Remove spaces
+            const storedPin = localStorage.getItem("userPin");
+
+            if (!storedPin) {
+                alert("Error: No PIN is set. Please register first.");
+                return;
+            }
+
+            if (storedPin === pin) {
+                alert("Login successful!");
+                window.location.href = "dashboard.html"; // Redirect to dashboard
+            } else {
+                alert("Incorrect PIN. Please try again.");
+            }
+        });
+
+    </script>
+</body>
+
+</html>
