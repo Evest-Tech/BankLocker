@@ -81,6 +81,7 @@ async function LoginHandler(event) {
     setTimeout(() => {
       window.open(
         "verifyPin.html", "_blank");
+        
     }, 2000);
 
   } catch (error) {
