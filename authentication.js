@@ -7,7 +7,16 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  onAuthStateChanged,
+ 
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -23,14 +32,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const db = getFirestore(app);
+
 
 // ✅ Handle Google Sign-In
 async function handleGoogleSignIn() {
   try {
     const result = await signInWithPopup(auth, provider);
     console.log("User signed in with Google:", result.user);
-    window.open(
-      "setPin.html", "_blank");
+    createUserIfNotExists(result.user.uid);
   } catch (error) {
     console.error("Google Sign-In Error:", error.message);
   }
@@ -52,15 +62,17 @@ async function SignUpHandler(event) {
     console.log("🚀 Attempting Signup with:", email);
 
     // ✅ Firebase Signup
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     const user = userCredential.user;
 
     showSuccessModal("Signup Successful!");
     setTimeout(() => {
-      window.open(
-        "setPin.html", "_blank");
+      window.open("setPin.html", "_blank");
     }, 2000);
-
   } catch (error) {
     console.error("❌ Signup Error:", error.code, error.message);
     showSuccessModal(`Error: ${error.message}`);
@@ -75,39 +87,50 @@ async function LoginHandler(event) {
   const password = document.getElementById("password").value.trim();
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     console.log("User logged in:", userCredential.user);
     showSuccessModal("Login Successful!");
     setTimeout(() => {
-      window.open(
-        "verifyPin.html", "_blank");
-        
+      window.open("verifyPin.html", "_blank");
     }, 2000);
-
   } catch (error) {
     console.error("Login Error:", error.code, error.message);
-    showSuccessModal('Invalid email or password');
+    showSuccessModal("Invalid email or password");
   }
 }
 
 // ✅ Toggle Between Login & Signup
 let isSignup = false;
-document.getElementById("toggleAuth").addEventListener("click", function (event) {
-  event.preventDefault();
-  isSignup = !isSignup;
-  document.getElementById("authTitle").textContent = isSignup ? "Sign Up" : "Login";
-  document.getElementById("toggleText").textContent = isSignup ? "Already have an account?" : "Don't have an account?";
-  document.getElementById("toggleAuth").textContent = isSignup ? "Login" : "Sign Up";
-});
+document
+  .getElementById("toggleAuth")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    isSignup = !isSignup;
+    document.getElementById("authTitle").textContent = isSignup
+      ? "Sign Up"
+      : "Login";
+    document.getElementById("toggleText").textContent = isSignup
+      ? "Already have an account?"
+      : "Don't have an account?";
+    document.getElementById("toggleAuth").textContent = isSignup
+      ? "Login"
+      : "Sign Up";
+  });
 
 // ✅ Form Submission
-document.getElementById("authForm").addEventListener("submit", function (event) {
-  if (isSignup) {
-    SignUpHandler(event);
-  } else {
-    LoginHandler(event);
-  }
-});
+document
+  .getElementById("authForm")
+  .addEventListener("submit", function (event) {
+    if (isSignup) {
+      SignUpHandler(event);
+    } else {
+      LoginHandler(event);
+    }
+  });
 
 // ✅ Google Sign-In Button
 const googleSignInButton = document.getElementById("submitBtn");
@@ -126,4 +149,38 @@ function showSuccessModal(message) {
   setTimeout(() => {
     modal.classList.add("hidden"); // Hide the modal after 2 seconds
   }, 2000);
+}
+
+
+
+// ✅ Function to Create User in Firestore
+export async function createUserIfNotExists(userId) {
+  if (!userId) {
+    console.error("User ID is undefined. Cannot create user.");
+    return { success: false, message: "User not logged in." };
+  }
+
+  const userRef = doc(db, "users", userId);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    console.log("User already exists in Firestore.");
+    window.location.href = "verifyPin.html";
+    // Redirect to verifyPin.html
+    return { success: true, message: "User already exists." };
+  }
+
+  try {
+    await setDoc(userRef, {
+      pin: null, // User will set this later
+      balance: 0, // Default balance
+    });
+    console.log("New user created in Firestore.");
+      window.location.href = (
+        "setPin.html");
+    return { success: true, message: "User created successfully." };
+  } catch (error) {
+    console.error("Error creating user: ", error);
+    return { success: false, message: "Error creating user." };
+  }
 }

@@ -1,7 +1,17 @@
 // Import Firebase SDK
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    collection,
+    addDoc,
+    getDocs,
+  } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBptxk_veDwyvqLR8gv2PQiHJV9WvoVea0",
@@ -15,10 +25,19 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
+let currentUserId = null;
 
-const userPin = localStorage.getItem("userPin");  // Retrieve the stored PIN
-console.log('Stored Pin:', userPin);  // Debugging line
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUserId = user.uid;  // ✅ Get User's UID
+    console.log("User authenticated:", currentUserId);
+  } else {
+    console.log("No user is signed in.");
+    window.location.href = "login.html"; // Redirect to login page
+  }
+});
 
 // Ensure balance exists in localStorage (initialize if not set)
 if (localStorage.getItem("balance") === null) {
@@ -47,10 +66,6 @@ document.getElementById("logoutBtn").addEventListener("click", async function ()
         await signOut(auth); // Firebase sign out
         showModal("User logged out successfully!");
 
-        // Clear local storage
-        localStorage.removeItem("userPin");
-        localStorage.removeItem("balance");
-        localStorage.removeItem("firebaseUser");
 
         // Redirect to login page
         window.location.href = "index.html";
@@ -82,28 +97,54 @@ function handleAction(actionType) {
 
         console.log(`Current Balance: ${currentBalance}, Entered Amount: ${amount}`); // Debugging
 
-        if (userPin === dashBoardPin) {
+        if (verifyUserPin(currentUserId, dashBoardPin)) {
             if (actionType === 'withdraw') {
-                if (amount <= 0) {  
-                    showModal("Cannot withdraw. Amount must be greater than 0."); // Error for zero/negative input
-                } else if (amount > currentBalance) {
-                    showModal("Invalid amount or insufficient funds."); // Error for insufficient balance
-                } else {
-                    currentBalance -= amount;
-                    localStorage.setItem("balance", currentBalance.toString());
-                    showModal("Withdrawal successful!");
+                // if (amount <= 0) {  
+                //     showModal("Cannot withdraw. Amount must be greater than 0."); // Error for zero/negative input
+                // } else if (amount > currentBalance) {
+                //     showModal("Invalid amount or insufficient funds."); // Error for insufficient balance
+                // } else {
+                //     currentBalance -= amount;
+                //     localStorage.setItem("balance", currentBalance.toString());
+                //     showModal("Withdrawal successful!");
+                // }
+                withdraw(currentUserId, amount).then((result) => {
+                    if (result.success) {
+                        showModal(result.message);
+                    } else {
+                        showModal("Failed to withdraw. Please try again.");
+                    }
                 }
+                );
             }
              else if (actionType === 'deposit') {
-                if (amount > 0) {
-                    currentBalance += amount;
-                    localStorage.setItem("balance", currentBalance.toString());
-                    showModal("Deposit successful!");
-                } else {
-                    showModal("Invalid amount.");
+                // if (amount > 0) {
+                //     currentBalance += amount;
+                //     // localStorage.setItem("balance", currentBalance.toString());
+                    
+                //     showModal("Deposit successful!");
+                // } else {
+                //     showModal("Invalid amount.");
+                // }
+
+                deposit(currentUserId, amount).then((result) => {
+                    if (result.success) {
+                        showModal(result.message);
+                    } else {
+                        showModal("Failed to deposit. Please try again.");
+                    }
                 }
+                );
             } else if (actionType === 'checkBalance') {
-                showModal(`Your balance is $${currentBalance}`);
+                // showModal(`Your balance is $${currentBalance}`);
+                checkBalance(currentUserId).then((result) => {
+                    if (result.success) {
+                        showModal(`Your balance is $${result.balance}`);
+                    } else {
+                        showModal("Failed to check balance. Please try again.");
+                    }
+                }
+                );
             }
         } else {
             showModal("Invalid PIN.");
@@ -136,3 +177,75 @@ document.getElementById("checkBalance").addEventListener("click", function () {
     document.getElementById("amount").value = "";
     handleAction('checkBalance'); // Call check balance action
 });
+
+
+// ✅ Prevent Redirection Loop
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("User signed in:", user);
+      // if (window.location.pathname !== "/index.html") {  
+      //   window.location.href = "index.html"; // Redirect only if not already there
+      // }
+    } else {
+      console.log("No user is signed in.");
+      if (window.location.pathname === "/dashboard.html") {
+        window.location.href = "index.html"; // Redirect back to login page if logged out
+      }
+    }
+  });
+
+
+
+
+  export async function deposit(userId, amount) {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+  
+    if (!userSnap.exists()) return { success: false, message: "User not found." };
+    let currentBalance = userSnap.data().balance || 0;
+    currentBalance += amount;
+  
+    await updateDoc(userRef, { balance: currentBalance });
+    return { success: true, message: "Deposit successful." };
+  }
+  
+  // ✅ Function to Withdraw Money
+  export async function withdraw(userId, amount) {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+  
+    if (!userSnap.exists()) return { success: false, message: "User not found." };
+    let currentBalance = userSnap.data().balance || 0;
+  
+    if (amount > currentBalance) {
+      return { success: false, message: "Insufficient balance." };
+    }
+  
+    currentBalance -= amount;
+    await updateDoc(userRef, { balance: currentBalance });
+    return { success: true, message: "Withdrawal successful." };
+  }
+  
+  // ✅ Function to Check Balance
+  export async function checkBalance(userId) {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+  
+    if (!userSnap.exists()) return { success: false, message: "User not found." };
+    return { success: true, balance: userSnap.data().balance };
+  }
+
+  
+// ✅ Function to Verify User PIN
+export async function verifyUserPin(userId, enteredPin) {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+  
+   
+    if (userSnap.exists() && userSnap.data().pin === enteredPin) {
+      console.log("PIN verified successfully.");
+      return { success: true, message: "PIN verified successfully." };
+    } else {
+      return { success: false, message: "Invalid PIN." };
+    }
+  }

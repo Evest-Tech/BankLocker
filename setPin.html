@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup - Set PIN</title>
+    <script type="module" src="setPin.js" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         /* Body styles */
@@ -155,12 +156,12 @@
                 <label for="pin" class="form-label">Enter a 4-Digit PIN</label>
                 <input type="password" id="pin" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" id="submitBtn" class="btn btn-primary">Submit</button>
         </form>
         <div class="alert alert-success mt-3" id="alertSuccess">PIN set successfully! Please proceed to login.</div>
     </div>
 
-    <script>
+    <!-- <script>
         document.getElementById("signupForm").addEventListener("submit", function (event) {
             event.preventDefault();
             const pin = document.getElementById("pin").value;
@@ -175,6 +176,6 @@
                 alert("PIN must be 4 digits!");
             }
         });
-    </script>
+    </script> -->
 </body>
 </html>
