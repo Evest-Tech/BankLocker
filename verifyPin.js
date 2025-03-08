@@ -12,6 +12,26 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
+// ✅ Show Success Modal with Website Styles
+function showSuccessModal(message) {
+  const modal = document.getElementById("successModal");
+  const modalMessage = document.getElementById("modalMessage");
+
+  modalMessage.textContent = message;
+  modal.classList.add("show"); // Show the modal
+
+  setTimeout(() => {
+      closeModal();
+  }, 2000);
+}
+
+// ✅ Close Modal Function
+function closeModal() {
+  const modal = document.getElementById("successModal");
+  modal.classList.remove("show"); // Hide modal
+}
+
+
 // ✅ Initialize Firebase
 const firebaseConfig = {
     // Your Firebase configuration here
@@ -33,9 +53,9 @@ const firebaseConfig = {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUserId = user.uid;  // ✅ Get User's UID
-      console.log("User authenticated:", currentUserId);
+      // console.log("User authenticated:", currentUserId);
     } else {
-      console.log("No user is signed in.");
+      // console.log("No user is signed in.");
       window.location.href = "login.html"; // Redirect to login page
     }
   });
@@ -47,9 +67,10 @@ const firebaseConfig = {
     
      
       if (userSnap.exists() && userSnap.data().pin === enteredPin) {
-        console.log("PIN verified successfully.");
+        showSuccessModal("PIN verified successfully.");
         return { success: true, message: "PIN verified successfully." };
       } else {
+        showSuccessModal("Invalid PIN.");
         return { success: false, message: "Invalid PIN." };
       }
     }
@@ -61,17 +82,17 @@ const firebaseConfig = {
         if (enteredPin.length === 4) {
             try {
             const result = await verifyUserPin(currentUserId, enteredPin);
-            console.log("User PIN verified:", result);
+            // console.log("User PIN verified:", result);
             if (result.success) {
                 window.location.href = "dashboard.html";
             } else {
-                showModal("Invalid PIN. Please try again.");
+                showSuccessModal("Invalid PIN. Please try again.");
             }
             } catch (error) {
-            console.error("Error verifying user PIN:", error.message);
-            showModal("Failed to verify user PIN. Please try again.");
+            // console.error("Error verifying user PIN:", error.message);
+            showSuccessModal("Failed to verify user PIN. Please try again.");
             }
         } else {
-            showModal("Please enter a 4-digit PIN.");
+            showSuccessModal("Please enter a 4-digit PIN.");
         }
     })

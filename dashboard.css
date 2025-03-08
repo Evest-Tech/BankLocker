@@ -59,11 +59,18 @@ body {
 .logout-btn {
     background-color: #F5D042; /* Golden Yellow */
     color: #0A174E; /* Dark Blue */
-    padding: 10px 20px;
-    border-radius: 50px;
+    font-size: 1.2rem;
+    padding-left: 18px;
+    padding-right: 18px;
+    width: 80%;
+    max-width: 120px;
     border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    transform: scale(1);
+    margin-right: 50px !important;
 }
 
 .logout-btn:hover {

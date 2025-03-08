@@ -39,10 +39,10 @@ const db = getFirestore(app);
 async function handleGoogleSignIn() {
   try {
     const result = await signInWithPopup(auth, provider);
-    console.log("User signed in with Google:", result.user);
+    // console.log("User signed in with Google:", result.user);
     createUserIfNotExists(result.user.uid);
   } catch (error) {
-    console.error("Google Sign-In Error:", error.message);
+    // console.error("Google Sign-In Error:", error.message);
   }
 }
 
@@ -74,7 +74,7 @@ async function SignUpHandler(event) {
       window.open("setPin.html", "_blank");
     }, 2000);
   } catch (error) {
-    console.error("❌ Signup Error:", error.code, error.message);
+    // console.error("❌ Signup Error:", error.code, error.message);
     showSuccessModal(`Error: ${error.message}`);
   }
 }
@@ -92,13 +92,13 @@ async function LoginHandler(event) {
       email,
       password
     );
-    console.log("User logged in:", userCredential.user);
+    // console.log("User logged in:", userCredential.user);
     showSuccessModal("Login Successful!");
     setTimeout(() => {
       window.open("verifyPin.html", "_blank");
     }, 2000);
   } catch (error) {
-    console.error("Login Error:", error.code, error.message);
+    // console.error("Login Error:", error.code, error.message);
     showSuccessModal("Invalid email or password");
   }
 }
@@ -138,25 +138,33 @@ if (googleSignInButton) {
   googleSignInButton.addEventListener("click", handleGoogleSignIn);
 }
 
-// ✅ Show Success Modal
 function showSuccessModal(message) {
   const modal = document.getElementById("successModal");
   const modalMessage = document.getElementById("modalMessage");
 
   modalMessage.textContent = message;
-  modal.classList.remove("hidden"); // Show the modal
+  modal.classList.remove("hidden"); // Show modal
+
+  // Ensure no lingering styles affect it
+  modal.style.display = "flex";  
+  modal.style.opacity = "1";
 
   setTimeout(() => {
-    modal.classList.add("hidden"); // Hide the modal after 2 seconds
+    modal.style.opacity = "0"; 
+    setTimeout(() => {
+      modal.classList.add("hidden");
+      modal.style.display = "none"; // Fully hide after transition
+    }, 300); // Wait for opacity transition
   }, 2000);
 }
+
 
 
 
 // ✅ Function to Create User in Firestore
 export async function createUserIfNotExists(userId) {
   if (!userId) {
-    console.error("User ID is undefined. Cannot create user.");
+    // console.error("User ID is undefined. Cannot create user.");
     return { success: false, message: "User not logged in." };
   }
 
@@ -164,7 +172,7 @@ export async function createUserIfNotExists(userId) {
   const userSnap = await getDoc(userRef);
 
   if (userSnap.exists()) {
-    console.log("User already exists in Firestore.");
+    // console.log("User already exists in Firestore.");
     window.location.href = "verifyPin.html";
     // Redirect to verifyPin.html
     return { success: true, message: "User already exists." };
@@ -175,12 +183,12 @@ export async function createUserIfNotExists(userId) {
       pin: null, // User will set this later
       balance: 0, // Default balance
     });
-    console.log("New user created in Firestore.");
+    // console.log("New user created in Firestore.");
       window.location.href = (
         "setPin.html");
     return { success: true, message: "User created successfully." };
   } catch (error) {
-    console.error("Error creating user: ", error);
+    // console.error("Error creating user: ", error);
     return { success: false, message: "Error creating user." };
   }
 }

@@ -12,6 +12,26 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
+// ✅ Show Success Modal with Website Styles
+function showSuccessModal(message) {
+  const modal = document.getElementById("successModal");
+  const modalMessage = document.getElementById("modalMessage");
+
+  modalMessage.textContent = message;
+  modal.classList.add("show"); // Show the modal
+
+  setTimeout(() => {
+      closeModal();
+  }, 2000);
+}
+
+// ✅ Close Modal Function
+function closeModal() {
+  const modal = document.getElementById("successModal");
+  modal.classList.remove("show"); // Hide modal
+}
+
+
 // ✅ Initialize Firebase
 const firebaseConfig = {
   // Your Firebase configuration here
@@ -33,9 +53,9 @@ let currentUserId = null;
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUserId = user.uid;  // ✅ Get User's UID
-    console.log("User authenticated:", currentUserId);
+    // console.log("User authenticated:", currentUserId);
   } else {
-    console.log("No user is signed in.");
+    // console.log("No user is signed in.");
     window.location.href = "login.html"; // Redirect to login page
   }
 });
@@ -44,10 +64,10 @@ export async function setUserPin(userId, pin) {
   const userRef = doc(db, "users", userId);
   try {
     await setDoc(userRef, { pin: pin, balance: 0 });
-    console.log("PIN set successfully.");
+    showSuccessModal("PIN set successfully.");
     return { success: true, message: "PIN set successfully." };
   } catch (error) {
-    console.error("Error setting PIN: ", error);
+    showSuccessModal("Invalid PIN");
     return { success: false, message: "Error setting PIN." };
   }
 }
@@ -58,16 +78,16 @@ document
      // Debugging line
     if (userPin.length === 4) {
       try {
-        console.log("User PIN:", userPin , typeof(Number(userPin)));
+        // console.log("User PIN:", userPin , typeof(Number(userPin)));
         const result = await setUserPin(currentUserId,userPin);
-        console.log("User PIN set:", result);
-        // showModal("User PIN set successfully!");
+        // console.log("User PIN set:", result);
+        showSuccessModal("User PIN set successfully!");
         window.location.href = "dashboard.html";
       } catch (error) {
-        console.error("Error setting user PIN:", error.message);
-        // showModal("Failed to set user PIN. Please try again.");
+        // console.error("Error setting user PIN:", error.message);
+        showSuccessModal("Failed to set user PIN. Please try again.");
       }
     } else {
-      showModal("Please enter a 4-digit PIN.");
+      showSuccessModal("Please enter a 4-digit PIN.");
     }
   });
